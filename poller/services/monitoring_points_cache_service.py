@@ -1,6 +1,6 @@
 import redis
 import json
-from typing import List
+from typing import List, Dict
 from datetime import datetime, timezone
 from poller.models.monitoring_point import MonitoringPoint
 from poller.config.config import settings
@@ -51,7 +51,7 @@ def get_monitoring_points_from_redis() -> List[MonitoringPoint]:
     return points
 
 
-def get_cache_metadata() -> dict:
+def get_monitoring_point_cache_metadata() -> Dict:
     """Get metadata on cached data"""
 
     # Connect to redis 
