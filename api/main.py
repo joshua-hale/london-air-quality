@@ -1,9 +1,11 @@
 import logging
 from fastapi import FastAPI
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from routes import health, boroughs
 from redis import asyncio as aioredis
+from redis.exceptions import RedisError
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from config.config import settings
@@ -27,14 +29,36 @@ async def lifespan(app: FastAPI):
         health_check_interval=30
         )
     
-    try:
-        # Test redis connection before accepting requests
-        await app.state.redis.ping()
-        logger.info("Redis client initialized with connection pool")
+    # Retry connection with exponential backoff
+    max_retries = 5
+    retry_delay = 2
+    for attempt in range(1, max_retries + 1):
+        try:
+            # Test redis connection before accepting requests
+            await app.state.redis.ping()
+            logger.info(f"Redis connected succesfully (attempt: {attempt}/{max_retries})")
+            break
 
+        except RedisError as e:
+            # Final attempt failed - give up
+            if attempt == max_retries:
+                logger.exception(f"Failed to connect to Redis after {max_retries} attempts")
+                await app.state.redis.aclose()
+                raise
+
+            # Not final attempt - retry
+            logger.warning(
+                f"Redis connection failed (attempt {attempt}/{max_retries}): {e} "
+                f"Retrying in {retry_delay} seconds..."
+            )
+
+            # Wait before tring to connect again
+            await asyncio.sleep(retry_delay)
+            retry_delay *= 1.5
+
+    try:
         # App runs here
         yield
-
     finally:
         # Clean up on shutdown/errors
         await app.state.redis.aclose()
