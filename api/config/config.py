@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     """API settings loaded from environment variables."""
     
     redis_host: str = "localhost"
-    redis_port: int = 6379
+    redis_port: int = 6379    
     
     model_config = SettingsConfigDict(
         env_file=".env",             
