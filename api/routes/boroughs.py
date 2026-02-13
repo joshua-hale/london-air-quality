@@ -1,8 +1,8 @@
 import json
 import logging
-from typing import List
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from redis import asyncio as aioredis
+from redis.exceptions import RedisError
 from api.config.redis_dependency import get_redis_client
 from config.rate_limit import limiter
 
@@ -46,6 +46,12 @@ async def get_all_boroughs(request: Request, response: Response, redis: aioredis
     
     except HTTPException:
          raise
+    except RedisError:
+        logger.exception("Redis unavailable in get_all_boroughs")
+        raise HTTPException(
+            status_code=503,
+            detail="Cache unavailable"
+        )
     except Exception as e:
          logger.exception("Error in get_all_boroughs")
          raise HTTPException(
