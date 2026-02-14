@@ -10,7 +10,7 @@ def main():
 
     MAX_RETRIES = 3
     RETRY_DELAY = 60
-
+    
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             points_count, borough_count = run_poller()
