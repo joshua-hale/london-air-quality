@@ -2,8 +2,8 @@ import redis
 import json
 from typing import List, Dict
 from datetime import datetime, timezone
-from poller.models.monitoring_point import MonitoringPoint
-from poller.config.config import settings
+from models.monitoring_point import MonitoringPoint
+from config.config import settings
 
 def write_monitoring_points_to_redis(monitoring_points: List[MonitoringPoint]):
     """

@@ -3,16 +3,15 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from redis import asyncio as aioredis
 from redis.exceptions import RedisError
-from api.config.redis_dependency import get_redis_client
+from config.redis_dependency import get_redis_client
 from config.rate_limit import limiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-
+@router.get("/boroughs")
 @limiter.limit("20/minute")
 @limiter.limit("200/hour")
-@router.get("/boroughs")
 async def get_all_boroughs(request: Request, response: Response, redis: aioredis.Redis=Depends(get_redis_client)):
     """Get air pollution data for all London boroughs"""
 

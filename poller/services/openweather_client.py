@@ -3,9 +3,9 @@ import asyncio
 import math
 from typing import List, Dict
 from datetime import datetime, timezone
-from poller.models.monitoring_point import MonitoringPoint
-from poller.config.config import settings
-from poller.exceptions.exceptions import OpenWeatherAPIError
+from models.monitoring_point import MonitoringPoint
+from config.config import settings
+from exceptions.exceptions import OpenWeatherAPIError
 
 async def fetch_monitoring_point(client: httpx.AsyncClient, location: dict) -> MonitoringPoint:
     """Fetch air quality data for ONE location from OpenWeather API"""
