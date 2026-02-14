@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
     
     # Retry connection with exponential backoff
     max_retries = 5
-    retry_delay = 2
+    retry_delay = 3
     for attempt in range(1, max_retries + 1):
         try:
             # Test redis connection before accepting requests

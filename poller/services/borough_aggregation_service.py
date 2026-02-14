@@ -19,7 +19,11 @@ def borough_aggregator(points: List[MonitoringPoint]) -> List[IndividualBorough]
         borough_points = borough_groups[borough_name]
 
         # Get list of PM2.5 values for all points in borough
-        pm25_values = [point.pm2_5 for point in borough_points]
+        pm25_values = [point.pm2_5 for point in borough_points if point.pm2_5 is not None]
+
+        # Skip processing this borough if no PM2.5 values (CHANGE LATER WHEN MORE ADDING MORE METRICS)
+        if len(pm25_values) == 0:
+            continue
 
         # Get borough average PM2.5 values
         total = 0
@@ -33,7 +37,7 @@ def borough_aggregator(points: List[MonitoringPoint]) -> List[IndividualBorough]
             if point.timestamp > latest_timestamp:
                 latest_timestamp = point.timestamp
 
-        # Create IndividualBorough object
+        # Create IndividualBorough object 
         borough = IndividualBorough(
             borough_name=borough_name,
             avg_pm_25=avg_pm25,
