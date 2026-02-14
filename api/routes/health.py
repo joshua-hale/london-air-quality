@@ -2,7 +2,7 @@ import logging
 from fastapi import APIRouter, Depends, Response
 from redis import asyncio as aioredis
 from redis.exceptions import RedisError
-from api.config.redis_dependency import get_redis_client
+from config.redis_dependency import get_redis_client
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

@@ -2,8 +2,8 @@ import redis
 import json
 from typing import List, Dict
 from datetime import datetime, timezone
-from poller.models.individualborough import IndividualBorough
-from poller.config.config import settings
+from models.individualborough import IndividualBorough
+from config.config import settings
 
 def write_borough_data_to_redis(boroughs: List[IndividualBorough]):
     """

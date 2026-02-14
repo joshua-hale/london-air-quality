@@ -1,6 +1,6 @@
 from typing import List, Dict
-from poller.models.individualborough import IndividualBorough
-from poller.models.monitoring_point import MonitoringPoint
+from models.individualborough import IndividualBorough
+from models.monitoring_point import MonitoringPoint
 
 def borough_aggregator(points: List[MonitoringPoint]) -> List[IndividualBorough]:
     """Aggregate monitoring point data by borough"""
