@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/boroughs")
-@limiter.limit("20/minute")
-@limiter.limit("200/hour")
+@limiter.limit("100/minute")
+@limiter.limit("10000/hour")
 async def get_all_boroughs(request: Request, response: Response, redis: aioredis.Redis=Depends(get_redis_client)):
     """Get air pollution data for all London boroughs"""
 

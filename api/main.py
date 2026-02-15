@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
         host=settings.redis_host,
         port=settings.redis_port,
         decode_responses=True,
-        max_connections=50,
+        max_connections=100,
         socket_connect_timeout=5,
         socket_timeout=5,
         retry_on_timeout=True,
