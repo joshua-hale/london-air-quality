@@ -1,0 +1,19 @@
+aws_region   = "eu-west-2"
+environment  = "dev"
+project_name = "london-air-quality"
+
+# VPC Configuration
+vpc_cidr = "10.0.0.0/16"
+
+# ECS Configuration
+ecs_task_cpu      = 256
+ecs_task_memory   = 512
+ecs_desired_count = 2
+ecs_image_tag     = "latest"
+
+# Poller ECS Configuration
+poller_task_cpu    = 512   
+poller_task_memory = 1024  
+
+# SECRETS (fill in actual values in terraform.tfvars)
+openweather_api_key = "your-openweather-api-key"
