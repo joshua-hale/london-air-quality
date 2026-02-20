@@ -5,6 +5,9 @@ RUN apt-get update && apt-get install -y \
     gdal-bin \
     libgdal-dev \
     libspatialindex-dev \
+    g++ \
+    gcc \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory

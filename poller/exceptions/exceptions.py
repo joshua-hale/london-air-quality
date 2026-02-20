@@ -1,4 +1,4 @@
-class OpenWeatherAPIError(Exception):
+class OpenMeteoAPIError(Exception):
     """Raised when OpenWeather API returns unexpected or malformed data"""
 
     pass
