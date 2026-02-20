@@ -1,28 +1,26 @@
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
+
 
 class Settings(BaseSettings):
     """Application settings loaded from env variables"""
 
     # Redis Configuration
-    redis_host: str = "redis"
+    redis_host: str
     redis_port: int = 6379
 
-    # OpenWeather API Configuration
-    openweather_api_key: str 
-    openweather_base_url: str = "http://api.openweathermap.org/data/2.5"
+    # Open-Meteo API Configuration
+    openmeteo_base_url: str = "https://air-quality-api.open-meteo.com/v1"
     api_timeout: float = 10.0
 
     # Rate Limiting
-    api_batch_size: int = 50 
-    api_batch_delay: float = 60.0 
-
-    # Poller Configuration
-    poller_schedule_minutes: int = 30
+    api_batch_size: int = 5
+    api_batch_delay: float = 1.0
 
     # Logging
     log_level: str = "INFO"
 
-    # Override from .env / REDIS_HOST or redis_host both work / Ignore unknown env vars
     model_config = SettingsConfigDict(
         env_file=".env",             
         env_file_encoding="utf-8",
@@ -31,4 +29,3 @@ class Settings(BaseSettings):
     )
 
 settings = Settings()
-

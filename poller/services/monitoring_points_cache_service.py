@@ -2,7 +2,7 @@ import redis
 import json
 from typing import List, Dict
 from datetime import datetime, timezone
-from models.monitoring_point import MonitoringPoint
+from models.borough import MonitoringPoint
 from config.config import settings
 
 def write_monitoring_points_to_redis(monitoring_points: List[MonitoringPoint]):

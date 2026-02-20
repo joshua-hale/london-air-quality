@@ -2,12 +2,12 @@ import redis
 import json
 from typing import List, Dict
 from datetime import datetime, timezone
-from models.individualborough import IndividualBorough
+from models.borough import Borough
 from config.config import settings
 
 BOROUGH_COUNT = 33
 
-def write_borough_data_to_redis(boroughs: List[IndividualBorough]):
+def write_borough_data_to_redis(boroughs: List[Borough]):
     """
     Write borough pollution data to redis
 
@@ -43,12 +43,12 @@ def write_borough_data_to_redis(boroughs: List[IndividualBorough]):
             existing_data = json.loads(existing_json)
 
             # Create a dictionary of new boroughs by name for easy lookup
-            new_boroughs_dict = {borough["borough_name"]: borough for borough in borough_data}
+            new_boroughs_dict = {borough["borough"]: borough for borough in borough_data}
 
             # Merge data by replacing old values where we have new data and keeping old data otherwise
             merged_data = []
             for old_borough in existing_data:
-                borough_name = old_borough["borough_name"]
+                borough_name = old_borough["borough"]
                 if borough_name in new_boroughs_dict:
                     # Append new data if available
                     merged_data.append(new_boroughs_dict[borough_name])
@@ -57,11 +57,11 @@ def write_borough_data_to_redis(boroughs: List[IndividualBorough]):
                     merged_data.append(old_borough)
 
             # Create set of existing names
-            existing_names = {borough["borough_name"] for borough in existing_data}
+            existing_names = {borough["borough"] for borough in existing_data}
 
             # Append any new data for any boroughs not in old data
             for new_borough in borough_data:
-                if new_borough["borough_name"] not in existing_names:
+                if new_borough["borough"] not in existing_names:
                     merged_data.append(new_borough)
             
             # Convert merged data to JSON string
@@ -69,6 +69,7 @@ def write_borough_data_to_redis(boroughs: List[IndividualBorough]):
 
             # Write to redis
             client.set("boroughs:latest", merged_json)
+            client.set("meta:borough_last_updated", datetime.now(timezone.utc).isoformat())
             client.set("meta:borough_count", len(merged_data))
 
         else:
@@ -79,7 +80,7 @@ def write_borough_data_to_redis(boroughs: List[IndividualBorough]):
             client.set("meta:borough_count", len(boroughs))
 
 
-def get_boroughs_from_redis() -> List[IndividualBorough]:
+def get_boroughs_from_redis() -> List[Borough]:
     """Read borough pollution data from redis cache"""
 
     #Connect to redis
@@ -94,8 +95,8 @@ def get_boroughs_from_redis() -> List[IndividualBorough]:
     # Parse JSON
     boroughs_data = json.loads(boroughs_json)
 
-    # Convert dictionary into IndividualBorough object
-    boroughs = [IndividualBorough(**data) for data in boroughs_data]
+    # Convert dictionary into Borough object
+    boroughs = [Borough(**data) for data in boroughs_data]
 
     return boroughs
 

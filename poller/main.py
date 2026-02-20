@@ -13,10 +13,9 @@ def main():
     
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            points_count, borough_count = run_poller()
+            borough_count = run_poller()
 
             logger.info("Poller execution completed successfully!")
-            logger.info(f"Monitoring points: {points_count}")
             logger.info(f"Boroughs: {borough_count}")
             logger.info(f"Attempts needed: {attempt}")
 
