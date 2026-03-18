@@ -9,6 +9,8 @@ from typing import Dict, List
 from data.borough_data import LONDON_MONITORING_POINTS
 
 URL = "https://archive-api.open-meteo.com/v1/archive"
+START_DATE = "2021-02-20"
+END_DATE = "2023-02-20"
 
 def fetch_borough_weather_data(location: Dict) -> pd.DataFrame:
     """Fetch weather data over a year for a single borough and return a Dataframe"""
@@ -17,8 +19,8 @@ def fetch_borough_weather_data(location: Dict) -> pd.DataFrame:
         "latitude": location["lat"],
         "longitude": location["lon"],
         "hourly": "temperature_2m,relative_humidity_2m,surface_pressure,precipitation,wind_speed_10m,wind_direction_10m,wind_gusts_10m,cloud_cover_low,shortwave_radiation",
-        "start_date": "2025-02-20",
-        "end_date": "2026-02-19"
+        "start_date": START_DATE,
+        "end_date": END_DATE
     }
 
     response = Client().get(URL, params=params)
@@ -40,17 +42,20 @@ def fetch_all_weather_data(locations: List[Dict]) -> pd.DataFrame:
     """Fetches all boroughs weather data and returns a single Dataframe"""
 
     all_dfs = []
+    count = 0
 
     for location in locations:
         df = fetch_borough_weather_data(location)
         all_dfs.append(df)
-        time.sleep(2)
+        print(f"Data Collected: {location} {count}/33")
+        count += 1
+        time.sleep(30)
 
     return pd.concat(all_dfs, ignore_index=True)
 
 if __name__ == "__main__":
     df = fetch_all_weather_data(LONDON_MONITORING_POINTS)
-    df.to_parquet("data/raw/weather/all_boroughs_2025-2026.parquet")
+    df.to_parquet(f"data/raw/weather/all_boroughs_{START_DATE}-{END_DATE}.parquet")
     print(f"Saved {len(df)} rows to parquet")
 
 

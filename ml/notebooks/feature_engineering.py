@@ -21,7 +21,7 @@ def build_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
 def build_lag_features(variables: List[str], df: pd.DataFrame) -> pd.DataFrame:
     """Build all lag features required for predictions"""
 
-    lag_times = [1, 3, 6, 12, 24, 48, 168]
+    lag_times = [1, 2, 3, 4, 5, 6, 8, 10, 12, 24, 36, 48]
 
     for variable in variables:
         for lag in lag_times:
@@ -32,7 +32,7 @@ def build_lag_features(variables: List[str], df: pd.DataFrame) -> pd.DataFrame:
 def build_rolling_features(variables: List[str], df: pd.DataFrame) -> pd.DataFrame:
     """Build all rolling features required for predictions"""
 
-    windows = [3, 6, 12, 24]
+    windows = [3, 6, 9, 12, 24, 48]
 
     for variable in variables:
         for window in windows:
@@ -60,11 +60,12 @@ def build_borough_encodings(df: pd.DataFrame) -> pd.DataFrame:
 def build_targets(pollutants: List[str], df: pd.DataFrame) -> pd.DataFrame:
     """Build target columns for model training"""
     
+    target_cols = {}
     for pollutant in pollutants:
-        df[f"target_{pollutant}_12h"] = df.groupby("borough")[pollutant].shift(-12)
-        df[f"target_{pollutant}_24h"] = df.groupby("borough")[pollutant].shift(-24)
-
-    return df
+        for horizon in [4, 8, 12]:
+            target_cols[f"target_{pollutant}_{horizon}h"] = df.groupby("borough")[pollutant].shift(-horizon)
+    
+    return pd.concat([df, pd.DataFrame(target_cols, index=df.index)], axis=1)
 
 def build_features(pollutants: List[str], df: pd.DataFrame) -> pd.DataFrame:
     """Build all features required for LGBM model predictions"""

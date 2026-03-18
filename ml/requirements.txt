@@ -4,8 +4,6 @@ pyarrow
 lightgbm
 scikit-learn
 optuna
-matplotlib
-seaborn
 jupyter
 python-dotenv
 holidays
