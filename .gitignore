@@ -63,11 +63,23 @@ docker-compose.override.yml
 .dockerignore
 
 # Terraform
-infrastructure/.terraform/
-infrastructure/*.tfstate
-infrastructure/*.tfstate.backup
-infrastructure/.terraform.lock.hcl
-infrastructure/terraform.tfvars
+terraform/.terraform/
+terraform/*.tfstate
+terraform/*.tfstate.*
+terraform/*.tfstate.backup
+terraform/.terraform.lock.hcl
+terraform/**/*.tfvars
+!terraform/**/*.tfvars.example
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+
+#ml
+ml/data/
+ml/data/processed
+ml/models
 
 # Frontend
 frontend/node_modules/
