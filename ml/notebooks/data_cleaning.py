@@ -1,13 +1,7 @@
 import pandas as pd
 
 def merge_pollution_weather_data() -> pd.DataFrame:
-    """
-    Merge pollution and weather data parquets
-    Note: Data required no further cleaning 
-    - No missing data
-    - No null values
-    - No problematic 0 values
-    """
+    """Merge pollution and weather data parquets"""
 
     pollution = pd.read_parquet("data/raw/pollution/all_boroughs_2025-2026.parquet")
     weather = pd.read_parquet("data/raw/weather/all_boroughs_2025-2026.parquet")
