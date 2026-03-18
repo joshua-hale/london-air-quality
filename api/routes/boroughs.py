@@ -10,8 +10,8 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 @router.get("/boroughs")
-@limiter.limit("100/minute")
-@limiter.limit("10000/hour")
+@limiter.limit("5000/minute")
+@limiter.limit("100000/hour")
 async def get_all_boroughs(request: Request, response: Response, redis: aioredis.Redis=Depends(get_redis_client)):
     """Get air pollution data for all London boroughs"""
 
@@ -38,7 +38,7 @@ async def get_all_boroughs(request: Request, response: Response, redis: aioredis
             response.headers["ETag"] = etag
 
         # Cache configuration
-        response.headers["Cache-Control"] = "public, max-age=600"
+        response.headers["Cache-Control"] = "public, max-age=60"
 
         # Return raw JSON recieved from redis
         return Response(content=boroughs_json, media_type="application/json")
