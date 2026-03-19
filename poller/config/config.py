@@ -10,8 +10,12 @@ class Settings(BaseSettings):
     redis_host: str
     redis_port: int = 6379
 
+    # S3 Bucket Configuration
+    s3_bucket: str
+
     # Open-Meteo API Configuration
     openmeteo_base_url: str = "https://air-quality-api.open-meteo.com/v1"
+    openmeteo_weather_url: str = "https://api.open-meteo.com/v1"
     api_timeout: float = 10.0
 
     # Rate Limiting
