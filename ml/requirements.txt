@@ -7,3 +7,4 @@ optuna
 jupyter
 python-dotenv
 holidays
+boto3
