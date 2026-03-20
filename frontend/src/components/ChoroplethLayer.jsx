@@ -7,11 +7,23 @@ const GEOJSON_URL =
   'https://raw.githubusercontent.com/radoi90/housequest-data/master/london_boroughs.geojson';
 
 function styleFeature(feature, apiData, pollutantKey) {
-  const value          = getBoroughValue(feature, apiData, pollutantKey);
-  const { min, max }   = POLLUTANT_BOUNDS[pollutantKey];
-  const colors         = POLLUTANTS.find(p => p.key === pollutantKey).colors;
-  const color          = value !== null ? getColor(value, min, max, colors) : '#ccc';
+  const value        = getBoroughValue(feature, apiData, pollutantKey);
+  const { min, max } = POLLUTANT_BOUNDS[pollutantKey];
+  const colors       = POLLUTANTS.find(p => p.key === pollutantKey).colors;
+  const color        = value !== null ? getColor(value, min, max, colors) : '#ccc';
   return { fillColor: color, weight: 1, color: 'white', fillOpacity: 0.75 };
+}
+
+function formatTime(iso) {
+  if (!iso) return null;
+  return new Date(iso).toLocaleString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+  });
 }
 
 export default function ChoroplethLayer({ apiData, pollutantKey }) {
@@ -23,7 +35,6 @@ export default function ChoroplethLayer({ apiData, pollutantKey }) {
   useEffect(() => { apiDataRef.current   = apiData;      }, [apiData]);
   useEffect(() => { pollutantRef.current = pollutantKey; }, [pollutantKey]);
 
-  // Build layer once — when API data first arrives
   useEffect(() => {
     if (!apiData.length) return;
 
@@ -49,14 +60,40 @@ export default function ChoroplethLayer({ apiData, pollutantKey }) {
                   b => b.borough.toLowerCase() === feature.properties.name.toLowerCase()
                 );
                 if (d) {
+                  const observedAt = formatTime(d.timestamp);
+                  const validAt    = formatTime(d.valid_at);
+
                   layer.bindPopup(`
-                    <strong>${d.borough}</strong><br/>
-                    AQI: ${d.european_aqi}<br/>
-                    PM2.5: ${d.pm2_5} μg/m³<br/>
-                    PM10: ${d.pm10} μg/m³<br/>
-                    NO₂: ${d.no2} μg/m³<br/>
-                    O₃: ${d.o3} μg/m³<br/>
-                    SO₂: ${d.so2} μg/m³
+                    <div style="font-family: Inter, sans-serif; min-width: 180px;">
+                      <div style="font-weight: 600; font-size: 14px; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #eee;">
+                        ${d.borough}
+                      </div>
+
+                      ${observedAt ? `
+                        <div style="font-size: 11px; color: #888; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.4px;">Observed</div>
+                        <div style="font-size: 12px; color: #333; margin-bottom: 10px;">${observedAt}</div>
+                      ` : ''}
+
+                      ${validAt ? `
+                        <div style="font-size: 11px; color: #888; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.4px;">Forecast valid at</div>
+                        <div style="font-size: 12px; color: #333; margin-bottom: 10px;">${validAt}</div>
+                      ` : ''}
+
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px;">
+                        <div style="font-size: 12px; color: #555;">AQI</div>
+                        <div style="font-size: 12px; font-weight: 500; text-align: right;">${d.european_aqi}</div>
+                        <div style="font-size: 12px; color: #555;">PM2.5</div>
+                        <div style="font-size: 12px; font-weight: 500; text-align: right;">${d.pm2_5} μg/m³</div>
+                        <div style="font-size: 12px; color: #555;">PM10</div>
+                        <div style="font-size: 12px; font-weight: 500; text-align: right;">${d.pm10} μg/m³</div>
+                        <div style="font-size: 12px; color: #555;">NO₂</div>
+                        <div style="font-size: 12px; font-weight: 500; text-align: right;">${d.no2} μg/m³</div>
+                        <div style="font-size: 12px; color: #555;">O₃</div>
+                        <div style="font-size: 12px; font-weight: 500; text-align: right;">${d.o3} μg/m³</div>
+                        <div style="font-size: 12px; color: #555;">SO₂</div>
+                        <div style="font-size: 12px; font-weight: 500; text-align: right;">${d.so2} μg/m³</div>
+                      </div>
+                    </div>
                   `).openPopup();
                 }
               },
@@ -66,9 +103,8 @@ export default function ChoroplethLayer({ apiData, pollutantKey }) {
       });
 
     return () => { layerRef.current?.remove(); };
-  }, [apiData.length]);
+  }, [apiData]);
 
-  // Re-style on pollutant toggle
   useEffect(() => {
     if (!layerRef.current) return;
     layerRef.current.setStyle(
