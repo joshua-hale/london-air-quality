@@ -2,19 +2,22 @@ import { POLLUTANTS } from '../utils/pollutantConfig';
 
 export default function PollutantToggle({ active, onChange }) {
   return (
-    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '10px' }}>
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
       {POLLUTANTS.map(p => (
         <button
           key={p.key}
           onClick={() => onChange(p.key)}
           style={{
-            padding: '5px 14px',
+            padding: '6px 18px',
             borderRadius: '20px',
-            border: '1px solid #ccc',
+            fontSize: '13px',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: active === p.key ? 500 : 400,
             cursor: 'pointer',
-            fontWeight: active === p.key ? 600 : 400,
-            background: active === p.key ? '#1d1d1d' : '#fff',
-            color:  active === p.key ? '#fff' : '#333',
+            border: active === p.key ? '1px solid #fff' : '1px solid #2a2a2a',
+            color: active === p.key ? '#000' : '#666',
+            background: active === p.key ? '#fff' : 'transparent',
+            transition: 'all 0.15s',
           }}
         >
           {p.label}
