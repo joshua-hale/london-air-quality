@@ -14,7 +14,7 @@ variable "vpc_id" {
 }
 
 variable "subnet_ids" {
-  description = "Subnet IDs for poller task"
+  description = "Subnet IDs for pipeline task"
   type        = list(string)
 }
 
@@ -38,8 +38,8 @@ variable "task_role_arn" {
   type        = string
 }
 
-variable "poller_repository_url" {
-  description = "ECR repository URL for poller image"
+variable "pipeline_repository_url" {
+  description = "ECR repository URL for pipeline image"
   type        = string
 }
 
@@ -61,7 +61,7 @@ variable "redis_port" {
 }
 
 variable "s3_bucket" {
-  description = "S3 bucket name for parquet storage"
+  description = "S3 bucket name for models and parquet storage"
   type        = string
 }
 
@@ -72,13 +72,13 @@ variable "schedule_expression" {
 }
 
 variable "task_cpu" {
-  description = "CPU units for poller task"
+  description = "CPU units for pipeline task"
   type        = number
-  default     = 512
+  default     = 1024  # 1 vCPU — more than poller, runs ML inference
 }
 
 variable "task_memory" {
-  description = "Memory for poller task in MB"
+  description = "Memory for pipeline task in MB"
   type        = number
-  default     = 1024
+  default     = 2048  # 2GB — needs to load 12 LightGBM models into memory
 }

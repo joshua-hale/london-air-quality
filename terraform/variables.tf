@@ -15,7 +15,6 @@ variable "environment" {
   default     = "dev"
 }
 
-# ADD THIS:
 variable "vpc_cidr" {
   description = "CIDR block for VPC"
   type        = string
@@ -23,11 +22,20 @@ variable "vpc_cidr" {
 }
 
 # ============================================
+# S3 Configuration
+# ============================================
+
+variable "s3_bucket" {
+  description = "S3 bucket name for parquet data and model storage"
+  type        = string
+}
+
+# ============================================
 # API ECS Configuration
 # ============================================
 
 variable "ecs_task_cpu" {
-  description = "CPU units for API task (256 = 0.25 vCPU)"
+  description = "CPU units for API task"
   type        = number
   default     = 256
 }
@@ -55,7 +63,7 @@ variable "ecs_image_tag" {
 # ============================================
 
 variable "poller_task_cpu" {
-  description = "CPU units for poller task (512 = 0.5 vCPU)"
+  description = "CPU units for poller task"
   type        = number
   default     = 512
 }
@@ -67,11 +75,17 @@ variable "poller_task_memory" {
 }
 
 # ============================================
-# Application Secrets
+# Pipeline Configuration
 # ============================================
 
-variable "openweather_api_key" {
-  description = "OpenWeather API key"
-  type        = string
-  sensitive   = true
+variable "pipeline_task_cpu" {
+  description = "CPU units for pipeline task"
+  type        = number
+  default     = 1024
+}
+
+variable "pipeline_task_memory" {
+  description = "Memory for pipeline task in MB"
+  type        = number
+  default     = 2048
 }
