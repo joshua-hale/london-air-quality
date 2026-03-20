@@ -48,21 +48,21 @@ http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/
                             │
                             ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│                          STORAGE LAYER                               │
-│                                                                      │
-│ ┌─────────────────────┐  ┌──────────────────────┐  ┌────────────┐ │
-│  ElastiCache Redis  │  │   S3 — Data Lake     │  │ S3 Models  │ │
-│                     │  │                      │  │            │ │
-│  • Current data     │  │  • Parquet files     │  │  • 12 ×    │ │
-│  • 12h predictions  │  │  • 580,000+ records  │  │  LightGBM  │ │
-│  • 24h predictions  │  │  • Feb 2023–present  │  │  models    │ │
-│  • Rate limit state │  │  • Ground truth      │  │            │ │
-│                     │  │    store             │  │  • feature │ │
-│                     │  │                      │  │  _columns  │ │
-│  Ephemeral cache —  │  │  Restores Redis on   │  │  .pkl      │ │
-│  S3 is source of    │  │  cold start or       │  │            │ │
-│  truth              │  │  pipeline failure    │  │  • borough │ │
-└─────────────────────┘  └──────────────────────┘  │  _map.pkl  │ │
+│                          STORAGE LAYER                              │
+│                                                                     │
+│ ┌─────────────────────┐  ┌──────────────────────┐  ┌────────────┐   │
+│  ElastiCache Redis  │  │   S3 — Data Lake     │  │ S3 Models  │     │
+│                     │  │                      │  │            │     │
+│  • Current data     │  │  • Parquet files     │  │  • 12 ×    │     │
+│  • 12h predictions  │  │  • 580,000+ records  │  │  LightGBM  │     │
+│  • 24h predictions  │  │  • Feb 2023–present  │  │  models    │     │
+│  • Rate limit state │  │  • Ground truth      │  │            │     │
+│                     │  │    store             │  │  • feature │     │
+│                     │  │                      │  │  _columns  │     │
+│  Ephemeral cache —  │  │  Restores Redis on   │  │  .pkl      │     │
+│  S3 is source of    │  │  cold start or       │  │            │     │
+│  truth              │  │  pipeline failure    │  │  • borough │     │
+└─────────────────────┘  └──────────────────────┘  │  _map.pkl  │     │
                                                       └────────────┘ ││
 └───────────────────────────┬─────────────────────────────────────────┘
                             │
