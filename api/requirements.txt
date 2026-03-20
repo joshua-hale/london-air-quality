@@ -18,3 +18,9 @@ pydantic-settings
 
 # Rate limiting
 slowapi==0.1.9
+
+# Testing
+pytest
+pytest-asyncio
+httpx
+anyio
