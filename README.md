@@ -1,4 +1,4 @@
-# London Air Pollution Intelligence
+# London Air Pollution 
 
 Real-time air quality monitoring and ML-powered forecasting 
 for all 33 London boroughs.
