@@ -89,3 +89,13 @@ variable "pipeline_task_memory" {
   type        = number
   default     = 2048
 }
+
+# ============================================
+# Domain Name
+# ============================================
+
+
+variable "domain_name" {
+  description = "Custom domain name"
+  type        = string
+}

@@ -229,3 +229,12 @@ output "cloudfront_domain_name" {
   description = "CloudFront domain name"
   value       = module.frontend.cloudfront_domain_name
 }
+
+# ============================================
+# Domain Outputs
+# ============================================
+
+output "domain_name" {
+  description = "Custom domain name"
+  value       = var.domain_name
+}
