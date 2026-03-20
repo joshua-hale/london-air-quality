@@ -13,12 +13,7 @@ variable "domain_name" {
   type        = string
 }
 
-variable "certificate_arn" {
-  description = "ACM certificate ARN from dns module"
-  type        = string
-}
-
-variable "api_domain" {
-  description = "ALB domain name for API proxying"
+variable "cloudfront_domain_name" {
+  description = "CloudFront distribution domain name"
   type        = string
 }

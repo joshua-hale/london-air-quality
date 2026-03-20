@@ -169,6 +169,28 @@ module "s3" {
 module "frontend" {
   source = "./modules/frontend"
 
-  project_name = var.project_name
-  environment  = var.environment
+  project_name    = var.project_name
+  environment     = var.environment
+  api_domain      = module.alb.alb_dns_name
+  domain_name     = var.domain_name
+  certificate_arn = module.dns.certificate_arn
 }
+
+# ============================================
+# DNS Module
+# ============================================
+
+module "dns" {
+  source = "./modules/dns"
+
+  providers = {
+    aws           = aws
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  project_name           = var.project_name
+  environment            = var.environment
+  domain_name            = var.domain_name
+  cloudfront_domain_name = module.frontend.cloudfront_domain_name
+}
+
