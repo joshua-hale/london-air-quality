@@ -54,8 +54,8 @@ http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/
 │  ElastiCache Redis  │  │   S3 — Data Lake     │  │ S3 Models  │     │
 │                     │  │                      │  │            │     │
 │  • Current data     │  │  • Parquet files     │  │  • 12 ×    │     │
-│  • 12h predictions  │  │  • 580,000+ records  │  │  LightGBM  │     │
-│  • 24h predictions  │  │  • Feb 2023–present  │  │  models    │     │
+│  • 4h predictions  │  │  • 580,000+ records  │  │  LightGBM  │      │
+│  • 8h predictions  │  │  • Feb 2023–present  │  │  models    │      │
 │  • Rate limit state │  │  • Ground truth      │  │            │     │
 │                     │  │    store             │  │  • feature │     │
 │                     │  │                      │  │  _columns  │     │
