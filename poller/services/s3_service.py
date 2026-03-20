@@ -1,5 +1,3 @@
-# services/s3_service.py
-
 import logging
 import s3fs
 import pandas as pd
@@ -18,7 +16,17 @@ PARQUET_COLUMNS = [
     "cloud_cover_low", "shortwave_radiation"
 ]
 
-fs = s3fs.S3FileSystem()
+def _get_filesystem() -> s3fs.S3FileSystem:
+    """Return S3FileSystem pointed at MinIO locally or real AWS in production."""
+    if settings.s3_endpoint_url:
+        return s3fs.S3FileSystem(
+            endpoint_url=settings.s3_endpoint_url,
+            key=settings.aws_access_key_id,
+            secret=settings.aws_secret_access_key
+        )
+    return s3fs.S3FileSystem()
+
+fs = _get_filesystem()
 
 def append_to_s3_parquet(boroughs: List[Borough], weather_data: List[BoroughWeather]) -> None:
     """Merge pollution and weather readings and append to per-borough S3 parquets."""
@@ -57,6 +65,10 @@ def append_to_s3_parquet(boroughs: List[Borough], weather_data: List[BoroughWeat
         "cloud_cover_low": w.cloud_cover_low,
         "shortwave_radiation": w.shortwave_radiation,
     } for w in weather_data])
+
+    # Floor timestamps to the hour so pollution and weather align
+    pollution_df["timestamp"] = pollution_df["timestamp"].dt.floor("h")
+    weather_df["timestamp"] = weather_df["timestamp"].dt.floor("h")
 
     # Merge on borough + timestamp — pollution left, weather right matches training
     merged = pollution_df.merge(weather_df, on=["timestamp", "borough"], suffixes=("", "_weather"))

@@ -2,7 +2,7 @@
 
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import time
 import logging
@@ -18,14 +18,21 @@ from services.s3_service import PARQUET_COLUMNS
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-fs = s3fs.S3FileSystem()
-
-# 7 days backfill window
 END_DATE = datetime.now().strftime("%Y-%m-%d")
 START_DATE = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
 
 POLLUTION_URL = "https://air-quality-api.open-meteo.com/v1/air-quality"
 WEATHER_URL = "https://api.open-meteo.com/v1/forecast"
+
+
+def _get_filesystem() -> s3fs.S3FileSystem:
+    if settings.s3_endpoint_url:
+        return s3fs.S3FileSystem(
+            endpoint_url=settings.s3_endpoint_url,
+            key=settings.aws_access_key_id,
+            secret=settings.aws_secret_access_key
+        )
+    return s3fs.S3FileSystem()
 
 
 def fetch_pollution(location: Dict, start: str, end: str) -> pd.DataFrame:
@@ -83,7 +90,7 @@ def fetch_weather(location: Dict, start: str, end: str) -> pd.DataFrame:
     return df
 
 
-def backfill_borough(location: Dict) -> None:
+def backfill_borough(location: Dict, fs: s3fs.S3FileSystem) -> None:
     """Fetch, merge and write one week of data for a single borough to S3."""
 
     borough = location["borough"]
@@ -93,18 +100,14 @@ def backfill_borough(location: Dict) -> None:
         pollution_df = fetch_pollution(location, START_DATE, END_DATE)
         weather_df = fetch_weather(location, START_DATE, END_DATE)
 
-        # Merge matching training script exactly — pollution left, weather right
         merged = pollution_df.merge(
             weather_df,
             on=["timestamp", "borough"],
             suffixes=("", "_weather")
         )
         merged = merged.drop(columns=["latitude_weather", "longitude_weather"])
-
-        # Enforce column order to match training parquet
         merged = merged[PARQUET_COLUMNS]
 
-        # Verify no columns are missing before writing
         missing = [col for col in PARQUET_COLUMNS if col not in merged.columns]
         if missing:
             logger.error(f"Missing columns for {borough}: {missing} — skipping")
@@ -124,13 +127,16 @@ def backfill_borough(location: Dict) -> None:
 def run_backfill(locations: List[Dict]) -> None:
     """Run backfill for all boroughs with rate limiting."""
 
+    fs = _get_filesystem()
+
     logger.info(f"Starting backfill: {START_DATE} to {END_DATE}")
+    logger.info(f"Target: s3://{settings.s3_bucket}/data/backfill/")
     logger.info(f"Backfilling {len(locations)} boroughs...")
 
     for i, location in enumerate(locations):
-        backfill_borough(location)
+        backfill_borough(location, fs)
         logger.info(f"Progress: {i + 1}/{len(locations)}")
-        time.sleep(1)  # respect Open-Meteo rate limits
+        time.sleep(1)
 
     logger.info("Backfill complete")
 

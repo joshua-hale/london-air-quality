@@ -15,7 +15,7 @@ POLLUTANTS = ["pm2_5", "pm10", "no2", "o3", "so2", "european_aqi"]
 HORIZONS = ["4h", "8h"]
 SPLIT_DATE = "2025-02-20"
 NON_FEATURE_COLS = ["timestamp", "borough"]
-S3_BUCKET = "bucket-name"
+S3_BUCKET = "london-air-quality-data-dev"
 
 def load_and_prepare_data() -> Tuple[pd.DataFrame, Dict]:
     """Load cleaned data, run feature engineering, return features and borough_map"""
@@ -91,6 +91,22 @@ def upload_models_to_s3(bucket: str):
         s3.upload_file(str(path), bucket, key)
         print(f"Uploaded s3://{bucket}/{key}")
 
+def upload_models_to_minio(bucket: str):
+    """Upload model artifacts to local MinIO instance for development."""
+
+    s3 = boto3.client(
+        "s3",
+        endpoint_url="http://localhost:9000",
+        aws_access_key_id="minioadmin",
+        aws_secret_access_key="minioadmin"
+    )
+
+    for path in Path("models").rglob("*.pkl"):
+        key = f"models/{path.relative_to('models')}"
+        s3.upload_file(str(path), bucket, key)
+        print(f"Uploaded to MinIO: {key}")
+
+
 def train_all_models(df: pd.DataFrame, feature_cols: List[str]) -> Dict:
     """Train all 18 LGBMRegressors (6 pollutants x 3 horizons)"""
 
@@ -111,20 +127,22 @@ def train_all_models(df: pd.DataFrame, feature_cols: List[str]) -> Dict:
     return all_metrics
 
 if __name__ == "__main__":
-    # Load data and engineer features
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--local", action="store_true", help="Upload to MinIO instead of real S3")
+    args = parser.parse_args()
+
     df, borough_map = load_and_prepare_data()
-
-    # Capture feature columns in exact training order 
     feature_cols = get_feature_columns(df)
-
-    # Save artifacts locally first
     save_artifacts_locally(borough_map, feature_cols)
-
-    # Train all 18 models
     metrics = train_all_models(df, feature_cols)
 
-    # Upload models to S3
-    #upload_models_to_s3(S3_BUCKET)
+    if args.local:
+        upload_models_to_minio("london-air-data")
+        print("Uploaded to MinIO for local dev")
+    else:
+        upload_models_to_s3(S3_BUCKET)
+        print(f"Uploaded to real S3: {S3_BUCKET}")
 
     print("\nAll models trained and uploaded.")
     print("\nFinal metrics:")
