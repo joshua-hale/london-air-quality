@@ -1,15 +1,5 @@
 FROM python:3.11-slim
 
-# Install system dependencies for GeoPandas and spatial libraries
-RUN apt-get update && apt-get install -y \
-    gdal-bin \
-    libgdal-dev \
-    libspatialindex-dev \
-    g++ \
-    gcc \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
 # Set working directory
 WORKDIR /app
 
