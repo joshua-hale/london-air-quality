@@ -3,7 +3,7 @@ from fastapi import FastAPI
 import asyncio
 from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from routes import health, boroughs
+from routes import health, boroughs, predictions_4h, predictions_8h
 from redis import asyncio as aioredis
 from redis.exceptions import RedisError
 from slowapi import _rate_limit_exceeded_handler
@@ -88,6 +88,8 @@ app.add_middleware(
 # Include routers
 app.include_router(health.router, tags=["Health"])
 app.include_router(boroughs.router, prefix="/api", tags=["Boroughs"])
+app.include_router(predictions_4h.router, prefix="/api", tags=["Predictions"])
+app.include_router(predictions_8h.router, prefix="/api", tags=["Predictions"])
 
 @app.get("/")
 async def root():
