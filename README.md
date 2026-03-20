@@ -7,7 +7,7 @@ for all 33 London boroughs.
 https://london-air-pollution.com
 
 ## API Documentation  
-http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/](http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/
+http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/
 
 ## Architecture 
 ```
@@ -125,7 +125,6 @@ Infrastructure: Terraform (8 modules) · Docker + ECR · Route 53 + ACM
 - **AWS CloudFront** — CDN edge caching, HTTPS termination, API proxying
 - **AWS ElastiCache** — managed Redis cluster
 - **AWS S3** — data lake, model storage and frontend static hosting
-- **AWS DynamoDB** — prediction fallback storage
 - **AWS Route 53 + ACM** — custom domain (london-air-pollution.com) with SSL certificate
 - **Terraform** — infrastructure as code across 8 modules, entire stack deployable from single apply
 
