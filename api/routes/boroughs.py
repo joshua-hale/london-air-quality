@@ -16,35 +16,41 @@ async def get_all_boroughs(request: Request, response: Response, redis: aioredis
     """Get air pollution data for all London boroughs"""
 
     try:
-        # Get boroughs and last_updated JSON data from redis 
+        # Get boroughs and last_updated JSON data from redis in single round trip
         boroughs_json, last_updated = await redis.mget("boroughs:latest", "meta:borough_last_updated")
 
         # Error handling for empty redis read
         if boroughs_json is None:
-                logger.warning("Cache is empty - returning 503")
-                raise HTTPException(
-                    status_code=503,
-                    detail="Borough data not available yet try again in a moment"
-                )
+            logger.warning("Cache is empty - returning 503")
+            raise HTTPException(
+                status_code=503,
+                detail="Borough data not available yet try again in a moment"
+            )
 
-        # ETag validation logic
+        # Build response headers Cache-Control is always included
+        headers = {"Cache-Control": "public, max-age=60"}
+
+        # ETag validation logic 
         if last_updated:
             etag = f'"{last_updated}"'
 
+            # Return 304 Not Modified if client already has current version
             if request.headers.get("if-none-match") == etag:
                 logger.info("ETag match - returning 304")
                 return Response(status_code=304)
-            
-            response.headers["ETag"] = etag
 
-        # Cache configuration
-        response.headers["Cache-Control"] = "public, max-age=60"
+            # Add ETag to response headers for client caching
+            headers["ETag"] = etag
 
-        # Return raw JSON recieved from redis
-        return Response(content=boroughs_json, media_type="application/json")
-    
+        # Return raw JSON received from redis with cache headers
+        return Response(
+            content=boroughs_json,
+            media_type="application/json",
+            headers=headers
+        )
+
     except HTTPException:
-         raise
+        raise
     except RedisError:
         logger.exception("Redis unavailable in get_all_boroughs")
         raise HTTPException(
@@ -52,12 +58,8 @@ async def get_all_boroughs(request: Request, response: Response, redis: aioredis
             detail="Cache unavailable"
         )
     except Exception as e:
-         logger.exception("Error in get_all_boroughs")
-         raise HTTPException(
+        logger.exception("Error in get_all_boroughs")
+        raise HTTPException(
             status_code=500,
             detail="Internal server error"
         )
-
-         
-
-    

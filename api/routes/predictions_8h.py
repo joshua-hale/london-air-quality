@@ -1,5 +1,3 @@
-# api/routers/predictions_8h.py
-
 import json
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -22,8 +20,10 @@ async def get_predictions_8h(
     """Get 8h air pollution predictions for all London boroughs"""
 
     try:
+        # Get predictions and pipeline last run timestamp from redis in single round trip
         predictions_json, last_updated = await redis.mget("predictions:8h", "pipeline:last_run")
 
+        # Error handling for empty redis read — pipeline may not have run yet
         if predictions_json is None:
             logger.warning("8h predictions cache empty — returning 503")
             raise HTTPException(
@@ -31,18 +31,28 @@ async def get_predictions_8h(
                 detail="8h predictions not available yet, try again in a moment"
             )
 
+        # Build response headers Cache-Control is always included
+        # 300 seconds (5 min) matches pipeline run frequency
+        headers = {"Cache-Control": "public, max-age=300"}
+
+        # ETag validation logic
         if last_updated:
             etag = f'"{last_updated}:8h"'
 
+            # Return 304 Not Modified if client already has current version
             if request.headers.get("if-none-match") == etag:
                 logger.info("ETag match — returning 304")
                 return Response(status_code=304)
 
-            response.headers["ETag"] = etag
+            # Add ETag to response headers for client caching
+            headers["ETag"] = etag
 
-        response.headers["Cache-Control"] = "public, max-age=300"
-
-        return Response(content=predictions_json, media_type="application/json")
+        # Return raw JSON received from redis with cache headers
+        return Response(
+            content=predictions_json,
+            media_type="application/json",
+            headers=headers
+        )
 
     except HTTPException:
         raise
