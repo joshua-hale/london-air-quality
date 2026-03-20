@@ -102,22 +102,47 @@ http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/]
 Infrastructure: Terraform (8 modules) · Docker + ECR · Route 53 + ACM
 ```
 
-## Project Structure
-london-air-quality/
-  api/          FastAPI service — serves Redis cached predictions
-  poller/       Ingestion service — fetches Open-Meteo data hourly
-  pipeline/     ML pipeline — feature engineering + LightGBM inference
-  frontend/     React application — map and charts views
-  terraform/    Infrastructure as code — AWS ECS, Redis, CloudFront
-  ml/           Model training scripts and feature engineering
-
-
 ## Technology Stack
-- FastAPI + Redis — sub-10ms API responses via precomputed predictions
-- LightGBM — 18 models across 6 pollutants and 2 horizons
-- AWS ECS Fargate — containerised hourly pipeline
-- Terraform — full infrastructure as code
-- React + Leaflet — interactive borough heatmap
+
+### Machine Learning
+- **LightGBM** — 12 models across 6 pollutants × 2 horizons (4h, 8h)
+- **Scikit-learn** — model evaluation (MAE, RMSE, R²)
+- **Pandas + NumPy** — feature engineering (lag features, rolling windows, cyclical encoding, wind vector decomposition)
+- **Joblib** — model serialisation and artifact storage
+
+### Backend
+- **FastAPI** — async REST API with automatic OpenAPI/Swagger documentation
+- **Pydantic** — request/response validation and prediction models
+- **Redis (ElastiCache)** — in-memory serving layer, sub-10ms responses via precomputed predictions
+- **S3 (Parquet)** — durable data lake for raw pollution/weather data and model artifacts
+- **Python httpx** — async Open-Meteo API ingestion
+
+### Infrastructure
+- **AWS ECS Fargate** — serverless containers for API service, ingestion poller and ML pipeline
+- **AWS EventBridge** — hourly cron scheduling for poller and pipeline tasks
+- **AWS ECR** — container image registry
+- **AWS ALB** — load balancing and health checks across API replicas
+- **AWS CloudFront** — CDN edge caching, HTTPS termination, API proxying
+- **AWS ElastiCache** — managed Redis cluster
+- **AWS S3** — data lake, model storage and frontend static hosting
+- **AWS DynamoDB** — prediction fallback storage
+- **AWS Route 53 + ACM** — custom domain (london-air-pollution.com) with SSL certificate
+- **Terraform** — infrastructure as code across 8 modules, entire stack deployable from single apply
+
+### DevOps
+- **Docker** — containerisation for all three services (API, poller, pipeline)
+- **Docker Compose + MinIO** — local development environment mirroring production
+- **GitHub** — version control with feature branch workflow and pull requests
+
+### Frontend
+- **React** — single page application
+- **Leaflet + GeoJSON** — interactive borough heatmap with pollution overlays
+- **Recharts** — forecast comparison charts and trajectory visualisations
+
+### Testing
+- **pytest + pytest-asyncio** — 17 unit tests across all API endpoints
+- **httpx** — async test client with mocked Redis dependencies
+- **hey** — HTTP load testing (p50/p95 latency at 1000 requests, 5 and 10 concurrent users)
 
 ## Model Performance
 
