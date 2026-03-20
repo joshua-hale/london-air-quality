@@ -86,6 +86,11 @@ frontend/node_modules/
 frontend/dist/
 frontend/build/
 frontend/.cache/
+node_modules/
+.vite/
+dist/
+build/
+.env
 
 # Jupyter
 .ipynb_checkpoints/

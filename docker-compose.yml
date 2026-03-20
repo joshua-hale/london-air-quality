@@ -13,6 +13,24 @@ services:
       timeout: 3s
       retries: 5
 
+  minio:
+    image: minio/minio
+    container_name: london-air-minio
+    ports:
+      - "9000:9000"  
+      - "9001:9001"   
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin
+    volumes:
+      - minio-data:/data
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   api:
     build:
       context: ./api
@@ -43,18 +61,50 @@ services:
       - REDIS_PORT=6379
       - REDIS_DB=0
       - LOG_LEVEL=INFO
-      - LAQN_API_URL=https://api.erg.ic.ac.uk/AirQuality
+      - S3_BUCKET=london-air-data
+      - S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
     depends_on:
       redis:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     volumes:
       - ./poller:/app
       - ./data:/app/data
     profiles:
-      - manual  
+      - manual
+
+  pipeline:
+    build:
+      context: ./pipeline
+      dockerfile: Dockerfile
+    container_name: london-air-pipeline
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - LOG_LEVEL=INFO
+      - S3_BUCKET=london-air-data
+      - S3_ENDPOINT_URL=http://minio:9000
+      - AWS_ACCESS_KEY_ID=minioadmin
+      - AWS_SECRET_ACCESS_KEY=minioadmin
+    depends_on:
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    volumes:
+      - ./pipeline:/app
+      - ./data:/app/data
+    profiles:
+      - manual
 
 volumes:
   redis-data:
+    driver: local
+  minio-data:
     driver: local
 
 networks:
