@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'; 
 
-const BASE_URL = 'http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/api';
+const BASE_URL = `${import.meta.env.VITE_API_URL}/api`;
 
 export function useAirQuality() {
   const [data, setData]       = useState({ now: [], forecast4h: [], forecast8h: [] });
