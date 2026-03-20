@@ -7,7 +7,7 @@ for all 33 London boroughs.
 https://london-air-pollution.com
 
 ## API Documentation  
-https://london-air-pollution.com/docs](http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/
+http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/](http://london-air-quality-dev-alb-1219433375.eu-west-2.elb.amazonaws.com/docs#/
 
 ## Architecture Overview
 Brief description + link to architecture diagram
