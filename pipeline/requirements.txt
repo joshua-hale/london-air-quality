@@ -1,0 +1,25 @@
+# Redis
+redis[hiredis]==5.0.1
+
+# Data processing
+pandas==2.1.4
+numpy==1.26.3
+pyarrow
+
+# ML
+lightgbm
+scikit-learn
+joblib
+
+# AWS
+s3fs==2026.2.0
+aiobotocore==3.3.0
+botocore
+boto3
+
+# Environment variables
+python-dotenv==1.0.0
+pydantic-settings
+
+# Logging
+python-json-logger==2.0.7
