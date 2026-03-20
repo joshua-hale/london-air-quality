@@ -113,7 +113,7 @@ Infrastructure: Terraform (8 modules) · Docker + ECR · Route 53 + ACM
 ### Backend
 - **FastAPI** — async REST API with automatic OpenAPI/Swagger documentation
 - **Pydantic** — request/response validation and prediction models
-- **Redis (ElastiCache)** — in-memory serving layer, sub-10ms responses via precomputed predictions
+- **Redis (ElastiCache)** — in-memory serving layer, sub-20ms responses via precomputed predictions
 - **S3 (Parquet)** — durable data lake for raw pollution/weather data and model artifacts
 - **Python httpx** — async Open-Meteo API ingestion
 
