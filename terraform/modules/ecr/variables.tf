@@ -31,3 +31,9 @@ variable "create_poller_repository" {
   type        = bool
   default     = false
 }
+
+variable "create_pipeline_repository" {
+  description = "Whether to create a separate pipeline repository"
+  type        = bool
+  default     = false
+}

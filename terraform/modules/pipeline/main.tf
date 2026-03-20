@@ -1,23 +1,23 @@
 # ============================================
-# CloudWatch Log Group for Poller
+# CloudWatch Log Group for Pipeline
 # ============================================
 
-resource "aws_cloudwatch_log_group" "poller" {
-  name              = "/ecs/${var.project_name}-${var.environment}-poller"
+resource "aws_cloudwatch_log_group" "pipeline" {
+  name              = "/ecs/${var.project_name}-${var.environment}-pipeline"
   retention_in_days = 7
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-poller-logs"
+    Name        = "${var.project_name}-${var.environment}-pipeline-logs"
     Environment = var.environment
   }
 }
 
 # ============================================
-# ECS Task Definition for Poller
+# ECS Task Definition for Pipeline
 # ============================================
 
-resource "aws_ecs_task_definition" "poller" {
-  family                   = "${var.project_name}-${var.environment}-poller"
+resource "aws_ecs_task_definition" "pipeline" {
+  family                   = "${var.project_name}-${var.environment}-pipeline"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
   cpu                      = var.task_cpu
@@ -27,8 +27,8 @@ resource "aws_ecs_task_definition" "poller" {
 
   container_definitions = jsonencode([
     {
-      name      = "poller"
-      image     = "${var.poller_repository_url}:${var.image_tag}"
+      name      = "pipeline"
+      image     = "${var.pipeline_repository_url}:${var.image_tag}"
       essential = true
 
       command = ["python", "main.py"]
@@ -55,16 +55,16 @@ resource "aws_ecs_task_definition" "poller" {
       logConfiguration = {
         logDriver = "awslogs"
         options = {
-          "awslogs-group"         = aws_cloudwatch_log_group.poller.name
+          "awslogs-group"         = aws_cloudwatch_log_group.pipeline.name
           "awslogs-region"        = data.aws_region.current.name
-          "awslogs-stream-prefix" = "poller"
+          "awslogs-stream-prefix" = "pipeline"
         }
       }
     }
   ])
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-poller-task"
+    Name        = "${var.project_name}-${var.environment}-pipeline-task"
     Environment = var.environment
   }
 }
@@ -73,13 +73,13 @@ resource "aws_ecs_task_definition" "poller" {
 # EventBridge Rule (Hourly Schedule)
 # ============================================
 
-resource "aws_cloudwatch_event_rule" "poller_schedule" {
-  name                = "${var.project_name}-${var.environment}-poller-schedule"
-  description         = "Trigger poller every hour"
+resource "aws_cloudwatch_event_rule" "pipeline_schedule" {
+  name                = "${var.project_name}-${var.environment}-pipeline-schedule"
+  description         = "Trigger ML pipeline every hour"
   schedule_expression = var.schedule_expression
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-poller-schedule"
+    Name        = "${var.project_name}-${var.environment}-pipeline-schedule"
     Environment = var.environment
   }
 }
@@ -88,14 +88,14 @@ resource "aws_cloudwatch_event_rule" "poller_schedule" {
 # EventBridge Target (ECS Task)
 # ============================================
 
-resource "aws_cloudwatch_event_target" "poller" {
-  rule     = aws_cloudwatch_event_rule.poller_schedule.name
-  arn      = var.ecs_cluster_arn  # Must be cluster ARN
+resource "aws_cloudwatch_event_target" "pipeline" {
+  rule     = aws_cloudwatch_event_rule.pipeline_schedule.name
+  arn      = var.ecs_cluster_arn
   role_arn = aws_iam_role.eventbridge_ecs_role.arn
 
   ecs_target {
     task_count          = 1
-    task_definition_arn = aws_ecs_task_definition.poller.arn
+    task_definition_arn = aws_ecs_task_definition.pipeline.arn
     launch_type         = "FARGATE"
 
     network_configuration {
@@ -111,7 +111,7 @@ resource "aws_cloudwatch_event_target" "poller" {
 # ============================================
 
 resource "aws_iam_role" "eventbridge_ecs_role" {
-  name = "${var.project_name}-${var.environment}-eventbridge-ecs-role"
+  name = "${var.project_name}-${var.environment}-pipeline-eventbridge-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -127,19 +127,18 @@ resource "aws_iam_role" "eventbridge_ecs_role" {
   })
 
   tags = {
-    Name        = "${var.project_name}-${var.environment}-eventbridge-ecs-role"
+    Name        = "${var.project_name}-${var.environment}-pipeline-eventbridge-role"
     Environment = var.environment
   }
 }
 
 resource "aws_iam_role_policy" "eventbridge_ecs_policy" {
-  name = "${var.project_name}-${var.environment}-eventbridge-ecs-policy"
+  name = "${var.project_name}-${var.environment}-pipeline-eventbridge-policy"
   role = aws_iam_role.eventbridge_ecs_role.id
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
-      # Allow RunTask + TagResource scoped to specific cluster
       {
         Effect = "Allow"
         Action = [
@@ -153,7 +152,6 @@ resource "aws_iam_role_policy" "eventbridge_ecs_policy" {
           }
         }
       },
-      # Allow passing IAM roles to ECS tasks
       {
         Effect = "Allow"
         Action = [
@@ -172,9 +170,5 @@ resource "aws_iam_role_policy" "eventbridge_ecs_policy" {
     ]
   })
 }
-
-# ============================================
-# Data Sources
-# ============================================
 
 data "aws_region" "current" {}

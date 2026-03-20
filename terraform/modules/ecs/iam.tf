@@ -100,3 +100,27 @@ resource "aws_iam_role_policy" "ecs_cloudwatch_policy" {
     ]
   })
 }
+
+resource "aws_iam_role_policy" "ecs_s3_policy" {
+  name = "${var.project_name}-${var.environment}-ecs-s3"
+  role = aws_iam_role.ecs_task_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.s3_bucket}",
+          "arn:aws:s3:::${var.s3_bucket}/*"
+        ]
+      }
+    ]
+  })
+}

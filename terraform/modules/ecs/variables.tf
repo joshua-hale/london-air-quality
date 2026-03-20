@@ -115,3 +115,8 @@ variable "deployment_maximum_percent" {
   type        = number
   default     = 100
 }
+
+variable "s3_bucket" {
+  description = "S3 bucket name — used to scope task role S3 permissions"
+  type        = string
+}
